@@ -1,0 +1,30 @@
+name = "echo-calendar"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+[observability]
+enabled = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "echo-calendar"
+database_id = "769769f0-4e96-456f-9d32-621545b0fa4b"
+
+[[kv_namespaces]]
+binding = "CAL_CACHE"
+id = "1299c96dd4eb49c89f94f295dde89a04"
+
+[triggers]
+crons = ["*/15 * * * *"]
+
+[[services]]
+binding = "ENGINE_RUNTIME"
+service = "echo-engine-runtime"
+
+[[services]]
+binding = "SHARED_BRAIN"
+service = "echo-shared-brain"
+
+[[services]]
+binding = "EMAIL_SENDER"
+service = "echo-email-sender"
