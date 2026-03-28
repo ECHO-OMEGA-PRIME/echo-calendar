@@ -242,11 +242,13 @@ export default {
       const b = await req.json() as any;
       const fields: string[] = [];
       const vals: any[] = [];
+      const CAL_ALLOWED_STR = ['name','slug','description','timezone','color','default_location'];
+      const CAL_ALLOWED_NUM = ['buffer_before','buffer_after'];
+      const CAL_ALLOWED_JSON = ['availability','settings'];
       for (const [k, v] of Object.entries(b)) {
-        if (['id', 'created_at'].includes(k)) continue;
-        if (['availability', 'settings'].includes(k)) { fields.push(`${k}=?`); vals.push(JSON.stringify(v)); }
-        else if (typeof v === 'string') { fields.push(`${k}=?`); vals.push(sanitize(v)); }
-        else if (typeof v === 'number') { fields.push(`${k}=?`); vals.push(v); }
+        if (CAL_ALLOWED_JSON.includes(k)) { fields.push(`${k}=?`); vals.push(JSON.stringify(v)); }
+        else if (CAL_ALLOWED_STR.includes(k) && typeof v === 'string') { fields.push(`${k}=?`); vals.push(sanitize(v)); }
+        else if (CAL_ALLOWED_NUM.includes(k) && typeof v === 'number') { fields.push(`${k}=?`); vals.push(v); }
       }
       if (fields.length) {
         fields.push("updated_at=datetime('now')");
@@ -304,11 +306,13 @@ export default {
       const b = await req.json() as any;
       const fields: string[] = [];
       const vals: any[] = [];
+      const EVT_ALLOWED_STR = ['title','description','location','status','start_time','end_time','timezone','recurrence_rule','color','booking_id'];
+      const EVT_ALLOWED_NUM = ['all_day','is_busy'];
+      const EVT_ALLOWED_JSON = ['attendees','reminders','metadata'];
       for (const [k, v] of Object.entries(b)) {
-        if (['id', 'calendar_id', 'created_at'].includes(k)) continue;
-        if (['attendees', 'reminders', 'metadata'].includes(k)) { fields.push(`${k}=?`); vals.push(JSON.stringify(v)); }
-        else if (typeof v === 'string') { fields.push(`${k}=?`); vals.push(sanitize(v)); }
-        else if (typeof v === 'number') { fields.push(`${k}=?`); vals.push(v); }
+        if (EVT_ALLOWED_JSON.includes(k)) { fields.push(`${k}=?`); vals.push(JSON.stringify(v)); }
+        else if (EVT_ALLOWED_STR.includes(k) && typeof v === 'string') { fields.push(`${k}=?`); vals.push(sanitize(v)); }
+        else if (EVT_ALLOWED_NUM.includes(k) && typeof v === 'number') { fields.push(`${k}=?`); vals.push(v); }
       }
       if (fields.length) {
         fields.push("updated_at=datetime('now')");
@@ -341,11 +345,13 @@ export default {
       const b = await req.json() as any;
       const fields: string[] = [];
       const vals: any[] = [];
+      const BT_ALLOWED_STR = ['name','slug','description','color','currency','location_type','location_value','confirmation_message','status'];
+      const BT_ALLOWED_NUM = ['duration','price','max_per_day','requires_approval','buffer_before','buffer_after'];
+      const BT_ALLOWED_JSON = ['questions','availability_override'];
       for (const [k, v] of Object.entries(b)) {
-        if (['id', 'calendar_id', 'created_at'].includes(k)) continue;
-        if (['questions', 'availability_override'].includes(k)) { fields.push(`${k}=?`); vals.push(JSON.stringify(v)); }
-        else if (typeof v === 'string') { fields.push(`${k}=?`); vals.push(sanitize(v)); }
-        else if (typeof v === 'number') { fields.push(`${k}=?`); vals.push(v); }
+        if (BT_ALLOWED_JSON.includes(k)) { fields.push(`${k}=?`); vals.push(JSON.stringify(v)); }
+        else if (BT_ALLOWED_STR.includes(k) && typeof v === 'string') { fields.push(`${k}=?`); vals.push(sanitize(v)); }
+        else if (BT_ALLOWED_NUM.includes(k) && typeof v === 'number') { fields.push(`${k}=?`); vals.push(v); }
       }
       if (fields.length) { vals.push(id); await env.DB.prepare(`UPDATE booking_types SET ${fields.join(',')} WHERE id=?`).bind(...vals).run(); }
       return json({ updated: true });
