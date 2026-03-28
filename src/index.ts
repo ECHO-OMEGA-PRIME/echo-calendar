@@ -219,13 +219,21 @@ export default {
     if (m === 'GET' && p.match(/^\/ics\/(\d+)$/)) {
       const id = p.split('/')[2];
       const event = await env.DB.prepare('SELECT * FROM events WHERE id=?').bind(id).first() as any;
-      if (!event) return json({ error: 'Not found' }, 404);
+      if (!event) } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      const stack = err instanceof Error ? err.stack : undefined;
+      slog('error', 'Unhandled request error', { method: m, path: p, error: msg, stack });
+      return json({ error: 'Internal server error', message: msg, path: p }, 500);
+    }
+
+    return json({ error: 'Not found' }, 404);
       const cal = await env.DB.prepare('SELECT * FROM calendars WHERE id=?').bind(event.calendar_id).first();
       const ics = generateICS(event, cal);
       return new Response(ics, { headers: { 'Content-Type': 'text/calendar', 'Content-Disposition': `attachment; filename=event-${id}.ics` } });
     }
 
     // ===== AUTH-PROTECTED API =====
+    try {
     if (!authOk(req, env)) return json({ error: 'Unauthorized' }, 401);
 
     // === Calendars ===
