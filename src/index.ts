@@ -82,7 +82,7 @@ export default {
     const ip = req.headers.get('CF-Connecting-IP') || 'unknown';
 
     // --- Public ---
-    if (p === '/') return json({ service: 'echo-calendar', version: '1.0.0', status: 'operational' });
+    if (p === '/') return json({ status: 'ok', service: 'echo-calendar', version: '1.0.0', timestamp: new Date().toISOString() });
     if (p === '/health') return json({ status: 'ok', service: 'echo-calendar', version: '1.0.0', timestamp: new Date().toISOString() });
 
     try {
@@ -219,17 +219,17 @@ export default {
     if (m === 'GET' && p.match(/^\/ics\/(\d+)$/)) {
       const id = p.split('/')[2];
       const event = await env.DB.prepare('SELECT * FROM events WHERE id=?').bind(id).first() as any;
-      if (!event) } catch (err: unknown) {
+      if (!event) return json({ error: 'Event not found' }, 404);
+      const cal = await env.DB.prepare('SELECT * FROM calendars WHERE id=?').bind(event.calendar_id).first();
+      const ics = generateICS(event, cal);
+      return new Response(ics, { headers: { 'Content-Type': 'text/calendar', 'Content-Disposition': `attachment; filename=event-${id}.ics` } });
+    }
+
+    } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       const stack = err instanceof Error ? err.stack : undefined;
       slog('error', 'Unhandled request error', { method: m, path: p, error: msg, stack });
       return json({ error: 'Internal server error', message: msg, path: p }, 500);
-    }
-
-    return json({ error: 'Not found' }, 404);
-      const cal = await env.DB.prepare('SELECT * FROM calendars WHERE id=?').bind(event.calendar_id).first();
-      const ics = generateICS(event, cal);
-      return new Response(ics, { headers: { 'Content-Type': 'text/calendar', 'Content-Disposition': `attachment; filename=event-${id}.ics` } });
     }
 
     // ===== AUTH-PROTECTED API =====
