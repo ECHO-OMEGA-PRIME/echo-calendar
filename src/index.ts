@@ -78,6 +78,7 @@ export default {
     // --- Public ---
     if (p === '/health') return json({ status: 'ok', service: 'echo-calendar', version: '1.0.0', timestamp: new Date().toISOString() });
 
+    try {
     // === Public Booking Page ===
     if (m === 'GET' && p.match(/^\/book\/([^/]+)\/([^/]+)$/)) {
       const parts = p.split('/');
@@ -453,7 +454,14 @@ export default {
       return json({ activity: r.results });
     }
 
-    return json({ error: 'Not found' }, 404);
+    return json({ error: 'Not found', path: p }, 404);
+    } catch (e: any) {
+      if (e.message?.includes('JSON')) {
+        return json({ error: 'Invalid JSON body' }, 400);
+      }
+      console.error(`[echo-calendar] ${e.message}`);
+      return json({ error: 'Internal server error' }, 500);
+    }
   },
 
   async scheduled(event: ScheduledEvent, env: Env): Promise<void> {
