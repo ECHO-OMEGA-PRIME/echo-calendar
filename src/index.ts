@@ -82,6 +82,7 @@ export default {
     const ip = req.headers.get('CF-Connecting-IP') || 'unknown';
 
     // --- Public ---
+    if (p === '/') return json({ service: 'echo-calendar', version: '1.0.0', status: 'operational' });
     if (p === '/health') return json({ status: 'ok', service: 'echo-calendar', version: '1.0.0', timestamp: new Date().toISOString() });
 
     try {
