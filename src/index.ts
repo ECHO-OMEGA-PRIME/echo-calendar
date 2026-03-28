@@ -459,7 +459,7 @@ export default {
       if (e.message?.includes('JSON')) {
         return json({ error: 'Invalid JSON body' }, 400);
       }
-      console.error(`[echo-calendar] ${e.message}`);
+      console.error(`[echo-calendar] Unhandled error: ${e.message}`);
       return json({ error: 'Internal server error' }, 500);
     }
   },
